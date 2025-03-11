@@ -64,4 +64,21 @@ router.get("/budget-comparison", async (req, res) => {
   }
 });
 
+// Get Expense Breakdown for a Trip
+router.get("/trip/:tripId", async (req, res) => {
+  try {
+    const expenses = await Expense.find({ tripId: req.params.tripId });
+    const categoryBreakdown = {};
+
+    expenses.forEach(expense => {
+      categoryBreakdown[expense.category] = (categoryBreakdown[expense.category] || 0) + expense.amount;
+    });
+
+    res.json(categoryBreakdown);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;

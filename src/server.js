@@ -6,6 +6,7 @@ const expenseRoutes = require("./routes/expense.routes");
 const reportsRoutes = require("./routes/reports.routes");
 const categoriesRoutes = require("./routes/categories.routes");
 const budgetRoutes = require("./routes/budget.routes");
+const tripRoutes = require("./routes/trip.routes");
 require("./jobs/recurring-expenses");
 require("dotenv").config();
 
@@ -19,6 +20,7 @@ app.use("/api/v1/expenses", expenseRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/categories", categoriesRoutes);
 app.use("/api/budget", budgetRoutes);
+app.use("/api/trips", tripRoutes);
 
 
 app.get("/", (req, res) => {

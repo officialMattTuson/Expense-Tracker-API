@@ -72,6 +72,17 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Get Expenses for a Specific Trip
+router.get("/trip/:tripId", async (req, res) => {
+  try {
+    const expenses = await Expense.find({ tripId: req.params.tripId });
+    res.json(expenses);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Search Expenses
 // Search for expenses based on query parameters
 

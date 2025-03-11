@@ -7,7 +7,8 @@ const ExpenseSchema = new mongoose.Schema({
   description: { type: String },
   date: { type: Date, default: Date.now },
   recurring: { type: Boolean, default: false },
-  recurrenceInterval: { type: String, enum: ["daily", "weekly", "monthly"], default: null } // New field
+  recurrenceInterval: { type: String, enum: ["daily", "weekly", "monthly"], default: null },
+  tripId: { type: mongoose.Schema.Types.ObjectId, ref: "Trip", default: null }, 
 });
 
 const Expense = mongoose.model("Expense", ExpenseSchema);

@@ -5,7 +5,8 @@ const router = express.Router();
 // Set a budget
 router.post("/", async (req, res) => {
   try {
-    const budget = new Budget(req.body);
+    const { amount, currency, startDate, endDate, categoryBudgets } = req.body;
+    const budget = new Budget({ amount, currency, startDate, endDate, categoryBudgets });
     await budget.save();
     res.status(201).json(budget);
   } catch (err) {
@@ -24,11 +25,66 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Get all budgets
+// 2. Get Budget
 router.get("/", async (req, res) => {
   try {
-    const budgets = await Budget.find();
-    res.json(budgets);
+    const budget = await Budget.findOne().sort({ _id: -1 });
+    if (!budget) return res.status(404).json({ error: "No budget found." });
+    res.json(budget);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Budget Alert (Notify When Close to Limit)
+router.get("/alerts", async (req, res) => {
+  try {
+    const budget = await Budget.findOne().sort({ _id: -1 });
+    if (!budget) return res.status(404).json({ error: "No budget found." });
+
+    const expenses = await Expense.find({
+      date: { $gte: budget.startDate, $lte: budget.endDate }
+    });
+
+    const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const remainingBudget = budget.amount - totalSpent;
+    const alertThreshold = budget.amount * 0.8; 
+
+    let alertMessage = null;
+    if (totalSpent >= alertThreshold) {
+      alertMessage = "⚠️ You have spent 80% or more of your budget!";
+    }
+
+    res.json({ totalBudget: budget.amount, totalSpent, remainingBudget, alertMessage });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get Category-wise Budget Report
+router.get("/category-comparison", async (req, res) => {
+  try {
+    const budget = await Budget.findOne().sort({ _id: -1 });
+    if (!budget) return res.status(404).json({ error: "No budget found." });
+
+    const expenses = await Expense.find({
+      date: { $gte: budget.startDate, $lte: budget.endDate }
+    });
+
+    let categoryComparison = budget.categoryBudgets.map((catBudget) => {
+      const spent = expenses
+        .filter(exp => exp.category === catBudget.category)
+        .reduce((sum, exp) => sum + exp.amount, 0);
+
+      return {
+        category: catBudget.category,
+        allocated: catBudget.allocatedAmount,
+        spent,
+        remaining: catBudget.allocatedAmount - spent
+      };
+    });
+
+    res.json(categoryComparison);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -7,6 +7,12 @@ router.post("/", async (req, res) => {
   try {
     const expense = new Expense(req.body);
     await expense.save();
+
+    if (expense.recurring) {
+      console.log(`Recurring expense added: ${expense.description}`);
+      // We will later add a CRON job to auto-generate expenses
+    }
+
     res.status(201).json(expense);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -65,5 +71,33 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Search Expenses
+// Search for expenses based on query parameters
+
+// router.get("/", async (req, res) => {
+//   try {
+//     const { category, startDate, endDate, minAmount, maxAmount, page = 1, limit = 10 } = req.query;
+
+//     let filter = {};
+
+//     if (category) filter.category = category;
+//     if (startDate && endDate) filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+//     if (minAmount || maxAmount) filter.amount = { 
+//       ...(minAmount && { $gte: Number(minAmount) }), 
+//       ...(maxAmount && { $lte: Number(maxAmount) }) 
+//     };
+
+//     const expenses = await Expense.find(filter)
+//       .sort({ date: -1 }) // Show latest expenses first
+//       .skip((page - 1) * limit)
+//       .limit(Number(limit));
+
+//     res.json(expenses);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
 
 module.exports = router;

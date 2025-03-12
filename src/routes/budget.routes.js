@@ -25,12 +25,12 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 2. Get Budget
+// 2. Get Budgets
 router.get("/", async (req, res) => {
   try {
-    const budget = await Budget.findOne().sort({ _id: -1 });
-    if (!budget) return res.status(404).json({ error: "No budget found." });
-    res.json(budget);
+    const budgets = await Budget.find();
+    if (!budgets || budgets.length === 0) return res.status(404).json({ error: "No budgets found." });
+    res.json(budgets);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

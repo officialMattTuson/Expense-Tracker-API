@@ -112,32 +112,53 @@ router.put("/:id", async (req, res) => {
 
 // Delete budget
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:budgetId", async (req, res) => {
   try {
-    const result = await Budget.findByIdAndDelete(req.params.id);
-    if (!result) return res.status(404).json({ error: "Budget not found" });
-    res.json({ message: "Budget deleted" });
+    const budget = await Budget.findById(req.params.budgetId);
+    if (!budget) return res.status(404).json({ message: "Budget not found" });
+
+    // If the budget being deleted is the active one, reset active budget
+    if (budget.isActive) {
+      await Budget.updateMany({}, { isActive: false });
+    }
+
+    await budget.deleteOne();
+    res.json({ message: "Budget deleted successfully" });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
+
 
 router.get("/active", async (req, res) => {
   try {
     const activeBudget = await Budget.findOne({ isActive: true });
-    if (!activeBudget) return res.status(404).json({ message: "No active budget found" });
+
+    if (!activeBudget) {
+      return res.status(200).json({ message: "No active budget set", budget: null });
+    }
+
     res.json(activeBudget);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+
 router.post("/set-active/:budgetId", async (req, res) => {
   try {
     const { budgetId } = req.params;
+    const currentActive = await Budget.findOne({ isActive: true });
 
+    // If the selected budget is already active, do nothing
+    if (currentActive && currentActive._id.toString() === budgetId) {
+      return res.status(200).json({ message: "Budget is already active", budget: currentActive });
+    }
+
+    // Unset any existing active budget
     await Budget.updateMany({}, { isActive: false });
 
+    // Set the selected budget as active
     const updatedBudget = await Budget.findByIdAndUpdate(
       budgetId,
       { isActive: true },
@@ -151,5 +172,6 @@ router.post("/set-active/:budgetId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;

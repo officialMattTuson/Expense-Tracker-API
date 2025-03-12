@@ -122,4 +122,34 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.get("/active", async (req, res) => {
+  try {
+    const activeBudget = await Budget.findOne({ isActive: true });
+    if (!activeBudget) return res.status(404).json({ message: "No active budget found" });
+    res.json(activeBudget);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/set-active/:budgetId", async (req, res) => {
+  try {
+    const { budgetId } = req.params;
+
+    await Budget.updateMany({}, { isActive: false });
+
+    const updatedBudget = await Budget.findByIdAndUpdate(
+      budgetId,
+      { isActive: true },
+      { new: true }
+    );
+
+    if (!updatedBudget) return res.status(404).json({ message: "Budget not found" });
+
+    res.json({ message: "Active budget updated", budget: updatedBudget });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

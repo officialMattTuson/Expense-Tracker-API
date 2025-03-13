@@ -1,6 +1,6 @@
 const express = require("express");
 const Expense = require("../models/expense.model");
-const Budget = require("../models/budget,model");
+const Budget = require("../models/budget.model");
 const router = express.Router();
 
 // 1. Get Monthly Spending Report

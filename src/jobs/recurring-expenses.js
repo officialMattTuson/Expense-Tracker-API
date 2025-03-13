@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 const mongoose = require("mongoose");
-const Expense = require("../models/expenseModel");
+const Expense = require("../models/expense.model");
 
 // Run job every day at midnight
 cron.schedule("0 0 * * *", async () => {

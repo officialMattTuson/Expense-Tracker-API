@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -8,7 +9,6 @@ const categoriesRoutes = require("./routes/categories.routes");
 const budgetRoutes = require("./routes/budget.routes");
 const tripRoutes = require("./routes/trip.routes");
 require("./jobs/recurring-expenses");
-require("dotenv").config();
 
 const app = express();
 connectDB(); // Connect to MongoDB
@@ -16,7 +16,7 @@ connectDB(); // Connect to MongoDB
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use("/api/v1/expenses", expenseRoutes);
+app.use("/api/expenses", expenseRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/categories", categoriesRoutes);
 app.use("/api/budget", budgetRoutes);

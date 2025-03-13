@@ -1,7 +1,7 @@
 const express = require("express");
 const Trip = require("../models/trip.model");
-const axios = require("axios");
 const router = express.Router();
+// const axios = require("axios");
 
 // Create a Trip
 router.post("/", async (req, res) => {

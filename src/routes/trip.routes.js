@@ -1,86 +1,86 @@
 const express = require("express");
-const Trip = require("../models/trip.model");
+const Event = require("../models/event.model");
 const router = express.Router();
 // const axios = require("axios");
 
-// Create a Trip
+// Create an Event
 router.post("/", async (req, res) => {
   try {
-    const trip = new Trip(req.body);
-    await trip.save();
-    res.status(201).json(trip);
+    const event = new Event(req.body);
+    await event.save();
+    res.status(201).json(event);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Get All Trips
+// Get All Events
 router.get("/", async (req, res) => {
   try {
-    const trips = await Trip.find();
-    res.json(trips);
+    const events = await Event.find();
+    res.json(events);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get Trip Details (including expenses)
-router.get("/:tripId", async (req, res) => {
+// Get Event Details (including expenses)
+router.get("/:eventId", async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId);
-    if (!trip) return res.status(404).json({ error: "Trip not found" });
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ error: "Event not found" });
 
-    const expenses = await Expense.find({ tripId: req.params.tripId });
+    const expenses = await Expense.find({ eventId: req.params.eventId });
     const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
-    res.json({ trip, expenses, totalSpent });
+    res.json({ event, expenses, totalSpent });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Update a Trip
+// Update an Event
 router.put("/:id", async (req, res) => {
   try {
-    const updatedTrip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
 
-    if (!updatedTrip) {
-      return res.status(404).json({ error: "Trip not found" });
+    if (!updatedEvent) {
+      return res.status(404).json({ error: "Event not found" });
     }
 
-    res.json(updatedTrip);
+    res.json(updatedEvent);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Delete a Trip
-router.delete("/:tripId", async (req, res) => {
+// Delete an Event
+router.delete("/:eventId", async (req, res) => {
   try {
-    const result = await Trip.findByIdAndDelete(req.params.tripId);
-    if (!result) return res.status(404).json({ error: "Trip not found" });
-    res.json({ message: "Trip deleted" });
+    const result = await Event.findByIdAndDelete(req.params.eventId);
+    if (!result) return res.status(404).json({ error: "Event not found" });
+    res.json({ message: "Event deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/:tripId/summary", async (req, res) => {
+router.get("/:eventId/summary", async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId);
-    if (!trip) return res.status(404).json({ error: "Trip not found" });
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ error: "Event not found" });
 
-    const expenses = await Expense.find({ tripId: req.params.tripId });
+    const expenses = await Expense.find({ eventId: req.params.eventId });
     const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     // Convert totalSpent to home currency
-    const response = await axios.get(`https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_API_KEY}/latest/${trip.destinationCurrency}`);
-    const exchangeRate = response.data.conversion_rates[trip.homeCurrency];
+    const response = await axios.get(`https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_API_KEY}/latest/${event.destinationCurrency}`);
+    const exchangeRate = response.data.conversion_rates[event.homeCurrency];
 
     res.json({
-      trip,
+      event,
       totalSpent,
       totalSpentConverted: (totalSpent * exchangeRate).toFixed(2),
       exchangeRate,

@@ -5,17 +5,20 @@ const router = express.Router();
 // Add Expense
 router.post("/", async (req, res) => {
   try {
-    const expense = new Expense(req.body);
+    const { description, amount, category, currency, budgetId, trip } = req.body;
+
+    const budget = await Budget.findById(budgetId);
+    if (!budget) return res.status(404).json({ message: "Budget not found" });
+
+    const expense = new Expense({ description, amount, category, currency, budget: budgetId, trip });
     await expense.save();
 
-    if (expense.recurring) {
-      console.log(`Recurring expense added: ${expense.description}`);
-      // We will later add a CRON job to auto-generate expenses
-    }
+    budget.expenses.push(expense._id);
+    await budget.save();
 
-    res.status(201).json(expense);
+    res.status(201).json({ message: "Expense added successfully", expense });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 

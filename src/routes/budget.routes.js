@@ -15,11 +15,13 @@ router.post("/", async (req, res) => {
 });
 
 // Get single budget
-router.get("/:id", async (req, res) => {
+router.get("/:budgetId", async (req, res) => {
   try {
-    const budget = await Budget.findById(req.params.id);
-    if (!budget) return res.status(404).json({ error: "Budget not found" });
-    res.json(budget);
+    const budget = await Budget.findById(req.params.budgetId).populate("expenses");
+    if (!budget) return res.status(404).json({ message: "Budget not found" });
+
+    const totalSpent = budget.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    res.json({ ...budget.toObject(), totalSpent });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -28,9 +30,14 @@ router.get("/:id", async (req, res) => {
 // 2. Get Budgets
 router.get("/", async (req, res) => {
   try {
-    const budgets = await Budget.find();
-    if (!budgets || budgets.length === 0) return res.status(404).json({ error: "No budgets found." });
-    res.json(budgets);
+    const budgets = await Budget.find().populate("expenses");
+
+    const budgetsWithTotalSpent = budgets.map(budget => {
+      const totalSpent = budget.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+      return { ...budget.toObject(), totalSpent };
+    });
+
+    res.json(budgetsWithTotalSpent);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -173,5 +180,13 @@ router.post("/set-active/:budgetId", async (req, res) => {
   }
 });
 
+router.get("/event/:eventId", async (req, res) => {
+  try {
+    const budgets = await Budget.find({ event: req.params.eventId }).populate("expenses");
+    res.json(budgets);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

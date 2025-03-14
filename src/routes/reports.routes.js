@@ -64,10 +64,10 @@ router.get("/budget-comparison", async (req, res) => {
   }
 });
 
-// Get Expense Breakdown for a Trip
-router.get("/trip/:tripId", async (req, res) => {
+// Get Expense Breakdown for an Event
+router.get("/event/:eventId", async (req, res) => {
   try {
-    const expenses = await Expense.find({ tripId: req.params.tripId });
+    const expenses = await Expense.find({ eventId: req.params.eventId });
     const categoryBreakdown = {};
 
     expenses.forEach(expense => {

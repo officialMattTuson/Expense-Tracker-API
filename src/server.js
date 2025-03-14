@@ -7,7 +7,7 @@ const expenseRoutes = require("./routes/expense.routes");
 const reportsRoutes = require("./routes/reports.routes");
 const categoriesRoutes = require("./routes/categories.routes");
 const budgetRoutes = require("./routes/budget.routes");
-const tripRoutes = require("./routes/trip.routes");
+const eventRoutes = require("./routes/event.routes");
 require("./jobs/recurring-expenses");
 
 const app = express();
@@ -19,8 +19,8 @@ app.use(bodyParser.json());
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/categories", categoriesRoutes);
-app.use("/api/budget", budgetRoutes);
-app.use("/api/trips", tripRoutes);
+app.use("/api/budgets", budgetRoutes);
+app.use("/api/events", eventRoutes);
 
 
 app.get("/", (req, res) => {

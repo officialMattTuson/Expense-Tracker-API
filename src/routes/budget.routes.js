@@ -5,8 +5,8 @@ const router = express.Router();
 // Set a budget
 router.post("/", async (req, res) => {
   try {
-    const { amount, currency, startDate, endDate, categoryBudgets } = req.body;
-    const budget = new Budget({ amount, currency, startDate, endDate, categoryBudgets });
+    const { name, amount, currency, startDate, endDate, categoryBudgets } = req.body;
+    const budget = new Budget({ name, amount, currency, startDate, endDate, categoryBudgets });
     await budget.save();
     res.status(201).json(budget);
   } catch (err) {

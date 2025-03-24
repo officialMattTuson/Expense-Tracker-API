@@ -1,5 +1,6 @@
 const express = require("express");
 const Expense = require("../models/expense.model");
+const Budget = require("../models/budget.model");
 const router = express.Router();
 
 // Add Expense
@@ -16,7 +17,7 @@ router.post("/", async (req, res) => {
     budget.expenses.push(expense._id);
     await budget.save();
 
-    res.status(201).json({ message: "Expense added successfully", expense });
+    res.status(201).json(expense);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

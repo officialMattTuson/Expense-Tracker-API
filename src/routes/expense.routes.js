@@ -11,7 +11,22 @@ router.post("/", async (req, res) => {
     const budget = await Budget.findById(budgetId);
     if (!budget) return res.status(404).json({ message: "Budget not found" });
 
-    const expense = new Expense({ description, amount, category, currency, budget: budgetId, trip, location });
+    const expense = new Expense({
+      description,
+      amount,
+      category,
+      currency,
+      budget: budgetId,
+      trip,
+      location: {
+        name: location.name,
+        address: location.address,
+        city: location.city,
+        country: location.country,
+        coordinates: location.coordinates,
+      },
+    });
+
     await expense.save();
 
     budget.expenses.push(expense._id);
@@ -45,12 +60,13 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update Expense
+// Update an existing expense
 router.put("/:id", async (req, res) => {
   try {
     const updatedExpense = await Expense.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
+      req.params.id,  // Find by ID
+      req.body,       // Update with new data
+      { new: true }   // Return the updated document
     );
 
     if (!updatedExpense) {
@@ -84,5 +100,34 @@ router.get("/trip/:tripId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// Search Expenses
+// Search for expenses based on query parameters
+
+// router.get("/", async (req, res) => {
+//   try {
+//     const { category, startDate, endDate, minAmount, maxAmount, page = 1, limit = 10 } = req.query;
+
+//     let filter = {};
+
+//     if (category) filter.category = category;
+//     if (startDate && endDate) filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+//     if (minAmount || maxAmount) filter.amount = { 
+//       ...(minAmount && { $gte: Number(minAmount) }), 
+//       ...(maxAmount && { $lte: Number(maxAmount) }) 
+//     };
+
+//     const expenses = await Expense.find(filter)
+//       .sort({ date: -1 }) // Show latest expenses first
+//       .skip((page - 1) * limit)
+//       .limit(Number(limit));
+
+//     res.json(expenses);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
 
 module.exports = router;

@@ -8,6 +8,7 @@ const reportsRoutes = require("./routes/reports.routes");
 const categoriesRoutes = require("./routes/categories.routes");
 const budgetRoutes = require("./routes/budget.routes");
 const eventRoutes = require("./routes/event.routes");
+const exchangeRoutes = require("./routes/exchange.routes");
 require("./jobs/recurring-expenses");
 
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/reports", reportsRoutes);
 app.use("/api/categories", categoriesRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/exchange", exchangeRoutes);
 
 
 app.get("/", (req, res) => {

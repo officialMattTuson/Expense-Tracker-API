@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const BudgetSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  event: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
+  trip: { type: mongoose.Schema.Types.ObjectId, ref: "Trip" },
   amount: { type: Number, required: true },
   currency: { type: String, required: true },
   startDate: { type: Date, required: true },

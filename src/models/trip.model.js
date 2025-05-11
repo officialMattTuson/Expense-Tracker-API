@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const EventSchema = new mongoose.Schema({
+const TripSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   startDate: { type: Date, required: true },
@@ -9,5 +9,5 @@ const EventSchema = new mongoose.Schema({
   expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expense" }],
 });
 
-const Event = mongoose.model("Event", EventSchema);
-module.exports = Event;
+const Trip = mongoose.model("Trip", TripSchema);
+module.exports = Trip;

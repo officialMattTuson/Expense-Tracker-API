@@ -7,10 +7,10 @@ const BudgetSchema = new mongoose.Schema({
   currency: { type: String, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  categoryBudgets: [
+  categoryBreakdown: [
     {
-      category: String,
-      allocatedAmount: Number
+      categoryId: Number,
+      amount: Number
     }
   ],
   expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expense" }],

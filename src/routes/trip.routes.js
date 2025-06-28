@@ -1,14 +1,63 @@
 const express = require("express");
 const Trip = require("../models/trip.model");
+const Budget = require("../models/budget.model");
 const router = express.Router();
 // const axios = require("axios");
 
 // Create an Trip
+// router.post("/", async (req, res) => {
+//   try {
+//     const trip = new Trip(req.body);
+//     await trip.save();
+//     res.status(201).json(trip);
+//   } catch (err) {
+//     res.status(400).json({ error: err.message });
+//   }
+// });
+
 router.post("/", async (req, res) => {
   try {
-    const trip = new Trip(req.body);
+    const {
+      name,
+      destination,
+      startDate,
+      endDate,
+      currency,
+      totalBudget,
+      categoryBreakdown,
+    } = req.body;
+
+    // 1. Create the Trip
+    const trip = new Trip({
+      name,
+      destination,
+      startDate,
+      endDate,
+      budgets: [],
+    });
     await trip.save();
-    res.status(201).json(trip);
+    
+    console.log("Creating budget");
+    // 2. Create the Budget, linking to the Trip
+    const budget = new Budget({
+      name: `${name} Budget`,
+      trip: trip._id,
+      amount: totalBudget,
+      currency,
+      startDate,
+      endDate,
+      categoryBreakdown: categoryBreakdown.map((cb) => ({
+        categoryId: cb.categoryId,
+        amount: cb.amount,
+      })),
+    });
+    await budget.save();
+
+    // 3. Update the Trip to include the new budget
+    trip.budgets.push(budget._id);
+    await trip.save();
+
+    res.status(201).json({ trip, budget });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -76,7 +125,9 @@ router.get("/:tripId/summary", async (req, res) => {
     const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     // Convert totalSpent to home currency
-    const response = await axios.get(`https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_API_KEY}/latest/${trip.destinationCurrency}`);
+    const response = await axios.get(
+      `https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_API_KEY}/latest/${trip.destinationCurrency}`
+    );
     const exchangeRate = response.data.conversion_rates[trip.homeCurrency];
 
     res.json({

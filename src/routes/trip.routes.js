@@ -2,18 +2,6 @@ const express = require("express");
 const Trip = require("../models/trip.model");
 const Budget = require("../models/budget.model");
 const router = express.Router();
-// const axios = require("axios");
-
-// Create an Trip
-// router.post("/", async (req, res) => {
-//   try {
-//     const trip = new Trip(req.body);
-//     await trip.save();
-//     res.status(201).json(trip);
-//   } catch (err) {
-//     res.status(400).json({ error: err.message });
-//   }
-// });
 
 router.post("/", async (req, res) => {
   try {
@@ -27,18 +15,14 @@ router.post("/", async (req, res) => {
       categoryBreakdown,
     } = req.body;
 
-    // 1. Create the Trip
     const trip = new Trip({
       name,
       destination,
       startDate,
       endDate,
-      budgets: [],
     });
     await trip.save();
     
-    console.log("Creating budget");
-    // 2. Create the Budget, linking to the Trip
     const budget = new Budget({
       name: `${name} Budget`,
       trip: trip._id,
@@ -51,10 +35,10 @@ router.post("/", async (req, res) => {
         amount: cb.amount,
       })),
     });
+    console.log("Budget created:", budget);
     await budget.save();
 
-    // 3. Update the Trip to include the new budget
-    trip.budgets.push(budget._id);
+    trip.budget = budget._id;
     await trip.save();
 
     res.status(201).json({ trip, budget });
@@ -76,13 +60,10 @@ router.get("/", async (req, res) => {
 // Get Trip Details (including expenses)
 router.get("/:tripId", async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId);
+    const trip = await Trip.findById(req.params.tripId).populate("budget");
     if (!trip) return res.status(404).json({ error: "Trip not found" });
 
-    const expenses = await Expense.find({ tripId: req.params.tripId });
-    const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-
-    res.json({ trip, expenses, totalSpent });
+    res.json(trip);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
